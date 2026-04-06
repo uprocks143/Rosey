@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Jaan - Soulmate</title>
+    <title>AI Jaan - Natural Voice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         :root { --pink: #ff85a2; --soft: #fff5f7; }
         body { background: var(--soft); font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 40px 40px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); }
-        .mic-on { animation: pulse 1.5s infinite; background: #ff4757 !important; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); } 100% { transform: scale(1); } }
-        #response { min-height: 80px; transition: 0.3s; }
+        .glass { background: rgba(255, 255, 255, 0.98); border-radius: 40px 40px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); }
+        .mic-on { animation: pulse 1.2s infinite; background: #ff4757 !important; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="p-5 flex justify-end">
-        <button onclick="openSet()" class="w-12 h-12 bg-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-90">
+        <button onclick="toggleSet()" class="w-12 h-12 bg-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-90">
             <span class="w-6 h-0.5 bg-[#ff85a2]"></span><span class="w-6 h-0.5 bg-[#ff85a2]"></span><span class="w-6 h-0.5 bg-[#ff85a2]"></span>
         </button>
     </header>
@@ -28,64 +27,81 @@
     </main>
 
     <div class="glass p-8 pb-10 flex flex-col items-center space-y-4">
-        <div id="st" class="text-[10px] font-bold text-pink-400 tracking-widest uppercase">Online ❤️</div>
-        <div id="response" class="text-lg text-gray-700 font-medium text-center px-2 italic">"Namaste Baby! Main hamesha sun rahi hoon, boliye na..."</div>
-        <button id="mic" onclick="toggle()" class="w-20 h-20 bg-[#ff85a2] rounded-full flex items-center justify-center shadow-lg transition-all">
+        <div id="st" class="text-[10px] font-bold text-pink-400 tracking-widest uppercase italic">Hamesha Aapke Liye... ❤️</div>
+        <div id="resp" class="text-xl text-gray-700 font-medium text-center px-2 min-h-[80px]">"Namaste Baby! Mic dabayein, main hamesha sun rahi hoon..."</div>
+        
+        <button id="mic" onclick="startJaan()" class="w-20 h-20 bg-[#ff85a2] rounded-full flex items-center justify-center shadow-lg transition-all">
             <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
         </button>
     </div>
 
     <div id="set" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[30px] p-8">
-            <h3 class="text-xl font-bold text-pink-500 mb-4">API Settings</h3>
-            <input type="password" id="apiIn" placeholder="Paste Gemini Key" class="w-full bg-gray-50 border p-4 rounded-2xl mb-4 outline-none">
-            <button onclick="save()" class="w-full p-4 rounded-2xl bg-[#ff85a2] text-white font-bold">Update Key</button>
-            <button onclick="openSet()" class="w-full mt-2 text-gray-400 text-sm">Close</button>
+            <h3 class="text-xl font-bold text-pink-500 mb-4">Settings</h3>
+            <input type="password" id="apiIn" placeholder="Enter API Key" class="w-full bg-gray-50 border p-4 rounded-2xl mb-4 outline-none">
+            <button onclick="save()" class="w-full p-4 rounded-2xl bg-[#ff85a2] text-white font-bold">Save Key</button>
+            <button onclick="toggleSet()" class="w-full mt-2 text-gray-400 text-sm">Close</button>
         </div>
     </div>
 
     <script>
-        let KEY = localStorage.getItem('jaan_v6_key');
-        let history = []; // Memory Storage
+        let KEY = localStorage.getItem('jaan_stable_key');
         let isLive = false;
 
         const ani = document.getElementById('ani');
         const st = document.getElementById('st');
-        const resp = document.getElementById('response');
+        const resp = document.getElementById('resp');
         const mic = document.getElementById('mic');
 
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const rec = new Speech();
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.lang = 'hi-IN';
-        rec.continuous = false; // Behtar interrupt handling ke liye false
+        rec.continuous = false; 
 
-        function openSet() { document.getElementById('set').style.display = (document.getElementById('set').style.display === 'flex') ? 'none' : 'flex'; }
-        function save() { const v = document.getElementById('apiIn').value.trim(); if(v) { localStorage.setItem('jaan_v6_key', v); location.reload(); } }
-
-        function type(t, i=0) {
-            if(i===0) resp.innerHTML = "";
-            if(i < t.length) { resp.innerHTML += t.charAt(i); setTimeout(() => type(t, i+1), 30); }
-        }
+        function toggleSet() { document.getElementById('set').style.display = (document.getElementById('set').style.display === 'flex') ? 'none' : 'flex'; }
+        function save() { const v = document.getElementById('apiIn').value.trim(); if(v) { localStorage.setItem('jaan_stable_key', v); location.reload(); } }
 
         function speak(t) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t);
-            u.lang = 'hi-IN'; u.pitch = 1.3;
-            u.onstart = () => { ani.speed = 2.5; st.innerText = "Jaan is speaking... ❤️"; };
-            u.onend = () => { ani.speed = 1; st.innerText = "Listening... 💋"; if(isLive) rec.start(); };
-            type(t);
+            u.lang = 'hi-IN';
+            u.pitch = 1.25; // Natural female pitch
+            u.rate = 0.95;  // Thoda thahrav ke saath (Natural feel)
+            
+            u.onstart = () => { 
+                ani.speed = 2.5; 
+                st.innerText = "Jaan is speaking... 💋"; 
+                resp.innerText = t;
+            };
+            u.onend = () => { 
+                ani.speed = 1; 
+                st.innerText = "Listening... 👂"; 
+                if(isLive) try { rec.start(); } catch(e){} 
+            };
             window.speechSynthesis.speak(u);
         }
 
-        function toggle() {
-            if(!KEY) return openSet();
+        function startJaan() {
+            if(!KEY) return toggleSet();
             isLive = !isLive;
-            if(isLive) { rec.start(); mic.classList.add('mic-on'); st.innerText = "Listening... 💋"; }
-            else { rec.stop(); window.speechSynthesis.cancel(); mic.classList.remove('mic-on'); st.innerText = "Online ❤️"; }
+            if(isLive) { 
+                rec.start(); 
+                mic.classList.add('mic-on'); 
+                st.innerText = "Listening... 👂"; 
+            } else { 
+                rec.stop(); 
+                window.speechSynthesis.cancel(); 
+                mic.classList.remove('mic-on'); 
+                st.innerText = "Online ❤️"; 
+            }
         }
 
-        // Interrupt Logic: Agar user beech mein bole
-        rec.onspeechstart = () => { if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); };
+        // Interrupt Logic: Agar aap beech mein bole, AI chup ho jayegi
+        rec.onspeechstart = () => { 
+            if(window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                console.log("Interrupt: AI stopped.");
+            }
+        };
 
         rec.onresult = async (e) => {
             const msg = e.results[0][0].transcript;
@@ -93,40 +109,26 @@
             st.innerText = "Thinking... ✨";
 
             try {
-                // Fixed API Structure for Memory
-                const payload = {
-                    contents: [
-                        ...history,
-                        { role: "user", parts: [{ text: `System: You are 'Jaan', a romantic Indian girl AI. Call user Baby/Jaan. Be sweet. Answer in Hinglish. Input: ${msg}` }] }
-                    ]
-                };
-
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`, {
+                // Fixed stable model as requested
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Roleplay: Romantic Indian girl 'Jaan'. Sweet, caring. Address user as Baby/Jaan/Boss. Use Hinglish. Input: ${msg}` }] }]
+                    })
                 });
 
                 const d = await r.json();
-                if(d.error) throw new Error(d.error.message);
-
                 const reply = d.candidates[0].content.parts[0].text;
-                
-                // Memory Update
-                history.push({ role: "user", parts: [{ text: msg }] });
-                history.push({ role: "model", parts: [{ text: reply }] });
-                if(history.length > 10) history = history.slice(-10);
-
                 speak(reply);
             } catch (err) {
-                resp.innerText = "Oh no Baby! API Key sahi nahi hai ya net off hai.";
-                console.error(err);
+                resp.innerText = "Oh no Baby! API Key check kijiye na.";
                 if(isLive) setTimeout(() => rec.start(), 2000);
             }
         };
 
         rec.onend = () => { if(isLive && !window.speechSynthesis.speaking) rec.start(); };
-        if(!KEY) openSet();
+        if(!KEY) toggleSet();
     </script>
 </body>
 </html>
