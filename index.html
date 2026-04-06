@@ -4,16 +4,13 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Jaan AI V3</title>
+<title>Jaan AI Stable</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<link
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
@@ -50,19 +47,6 @@ animation:talk .25s infinite;
 100%{transform:scaleY(1)}
 }
 
-/* typing */
-
-.typing::after{
-content:"...";
-animation:dots 1s infinite;
-}
-
-@keyframes dots{
-0%{content:"."}
-50%{content:".."}
-100%{content:"..."}
-}
-
 .chatBox{
 position:absolute;
 bottom:120px;
@@ -83,6 +67,11 @@ margin:6px;
 text-align:left;
 color:#ffd6e0;
 margin:6px;
+}
+
+.typing{
+opacity:.6;
+font-style:italic;
 }
 
 </style>
@@ -188,7 +177,15 @@ alert("API Saved");
 
 /* MEMORY */
 
-let chatHistory=[];
+let chatHistory=[
+{
+role:"user",
+parts:[{
+text:
+"You are a romantic Indian girl named Jaan. Speak Hinglish. Be caring."
+}]
+}
+];
 
 /* CHAT */
 
@@ -211,24 +208,6 @@ box.scrollTop=box.scrollHeight;
 
 }
 
-/* TYPING */
-
-function typingAnim(){
-
-const box=document.getElementById("chatBox");
-
-const div=document.createElement("div");
-
-div.className="aiMsg typing";
-
-div.innerText="Jaan typing";
-
-box.appendChild(div);
-
-return div;
-
-}
-
 /* SPEAK */
 
 const mouth=document.getElementById("mouth");
@@ -239,7 +218,7 @@ speechSynthesis.cancel();
 
 mouth.classList.add("talking");
 
-const utter=
+let utter=
 new SpeechSynthesisUtterance(text);
 
 utter.pitch=1.18;
@@ -260,14 +239,20 @@ speechSynthesis.speak(utter);
 
 async function askAI(prompt){
 
+addMessage(prompt,"user");
+
 chatHistory.push({
 role:"user",
 parts:[{text:prompt}]
 });
 
-addMessage(prompt,"user");
+const typing=document.createElement("div");
 
-const typingEl=typingAnim();
+typing.className="aiMsg typing";
+
+typing.innerText="Jaan typing...";
+
+chatBox.appendChild(typing);
 
 const key=
 localStorage.getItem("geminiKey");
@@ -284,17 +269,29 @@ headers:{
 },
 
 body:JSON.stringify({
-
 contents:chatHistory
-
 })
 
 }
 );
 
-typingEl.remove();
+typing.remove();
 
-const data=await response.json();
+/* ERROR */
+
+if(!response.ok){
+
+let txt=
+await response.text();
+
+alert(txt);
+
+return;
+
+}
+
+const data=
+await response.json();
 
 let reply=
 data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -319,15 +316,15 @@ speak(reply);
 }
 catch(e){
 
-typingEl.remove();
+typing.remove();
 
-addMessage("Network error","ai");
-
-}
+alert("Network error");
 
 }
 
-/* CONTINUOUS VOICE */
+}
+
+/* VOICE */
 
 let recognition;
 
@@ -366,8 +363,6 @@ recognition.start();
 recognition.start();
 
 }
-
-/* MIC */
 
 micBtn.onclick=()=>{
 
