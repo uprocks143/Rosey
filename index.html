@@ -16,36 +16,24 @@
     <style>
         :root { --jaan-pink: #ff85a2; --jaan-soft: #fff5f7; }
         body { background-color: var(--jaan-soft); font-family: 'Segoe UI', Roboto, sans-serif; height: 100vh; overflow: hidden; }
-        
-        /* Glassmorphism Panel */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 40px 40px 0 0;
-            box-shadow: 0 -10px 30px rgba(255, 133, 162, 0.15);
-        }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-radius: 40px 40px 0 0; box-shadow: 0 -10px 30px rgba(255, 133, 162, 0.15); }
 
-        /* Mic Pulse Animation */
         .mic-active {
-            animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+            animation: pulse-ring 1.5s infinite;
             background-color: #ff4757 !important;
         }
 
         @keyframes pulse-ring {
             0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
             100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
         }
-
-        /* Menu Icon Animation */
-        .menu-dot { transition: 0.3s; }
-        .menu-btn:active .menu-dot { transform: scale(0.8); }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="p-5 flex justify-end items-center z-50">
-        <button onclick="toggleSettings()" class="menu-btn w-12 h-12 bg-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-sm active:bg-pink-50 transition-all">
+        <button onclick="toggleSettings()" class="w-12 h-12 bg-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-90 transition-all">
             <span class="w-6 h-0.5 bg-[#ff85a2] rounded-full"></span>
             <span class="w-6 h-0.5 bg-[#ff85a2] rounded-full"></span>
             <span class="w-6 h-0.5 bg-[#ff85a2] rounded-full"></span>
@@ -53,123 +41,115 @@
     </header>
 
     <main class="flex-1 flex flex-col items-center justify-center relative">
-        <div id="character-box" class="w-full max-w-[400px] aspect-square flex items-center justify-center transition-all duration-500">
-            <lottie-player 
-                id="jaan-anim"
-                src="https://lottie.host/86d63d64-e659-4a7b-b5d1-562725164993/4RoxvY8Z8n.json" 
-                background="transparent" 
-                speed="1" 
-                style="width: 100%; height: 100%;" 
-                loop autoplay>
-            </lottie-player>
-        </div>
-        
-        <div class="absolute top-1/4 right-10 opacity-40 animate-bounce text-pink-400">❤️</div>
-        <div class="absolute bottom-1/3 left-10 opacity-30 animate-pulse text-pink-300 text-xl">💖</div>
+        <lottie-player id="jaan-anim" src="https://lottie.host/86d63d64-e659-4a7b-b5d1-562725164993/4RoxvY8Z8n.json" background="transparent" speed="1" style="width: 320px; height: 320px;" loop autoplay></lottie-player>
     </main>
 
     <div class="glass-panel p-8 pb-12 flex flex-col items-center space-y-4 z-20">
-        <div id="status-badge" class="text-[10px] font-bold tracking-[3px] text-pink-400 uppercase">System Online</div>
+        <div id="status-badge" class="text-[10px] font-bold tracking-[3px] text-pink-400 uppercase italic">Online ❤️</div>
         
-        <div id="display-text" class="text-lg text-gray-700 font-medium italic text-center min-h-[80px] px-4 leading-relaxed">
-            "Namaste Baby! Tap kijiye aur mujhse dil ki baat kijiye..."
+        <div id="display-text" class="text-lg text-gray-700 font-medium italic text-center min-h-[90px] px-4 leading-relaxed">
+            "Namaste Baby! Main hamesha sun rahi hoon, boliye na..."
         </div>
 
-        <button id="mic-trigger" onclick="startInteraction()" class="w-20 h-20 bg-[#ff85a2] rounded-full flex items-center justify-center shadow-lg shadow-pink-200 transition-all active:scale-90">
+        <button id="mic-trigger" onclick="toggleAutoMode()" class="w-20 h-20 bg-[#ff85a2] rounded-full flex items-center justify-center shadow-lg transition-all duration-300">
             <svg id="mic-icon" class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
             </svg>
         </button>
-        
-        <div class="text-[10px] text-gray-300 font-mono">Gemini 3.1 Flash Enabled</div>
     </div>
 
     <div id="settings-modal" class="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] hidden items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[35px] p-8 shadow-2xl relative">
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Jaan Settings</h3>
-            <p class="text-gray-500 text-sm mb-6">Nayi API Key yahan update karein, Boss!</p>
-            
-            <input type="password" id="api-input" placeholder="Paste API Key here..." class="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-pink-300 transition-all">
-            
+            <input type="password" id="api-input" placeholder="Paste API Key here..." class="w-full bg-gray-50 border p-4 rounded-2xl mb-4 outline-none">
             <div class="flex gap-3">
-                <button onclick="toggleSettings()" class="flex-1 p-4 rounded-2xl bg-gray-100 text-gray-600 font-bold active:scale-95 transition-all">Cancel</button>
-                <button onclick="saveApiKey()" class="flex-1 p-4 rounded-2xl bg-[#ff85a2] text-white font-bold shadow-lg shadow-pink-100 active:scale-95 transition-all">Save Key</button>
+                <button onclick="toggleSettings()" class="flex-1 p-4 rounded-2xl bg-gray-100 font-bold">Cancel</button>
+                <button onclick="saveApiKey()" class="flex-1 p-4 rounded-2xl bg-[#ff85a2] text-white font-bold">Save Key</button>
             </div>
-            
-            <button onclick="localStorage.clear(); location.reload();" class="mt-6 text-xs text-red-300 underline w-full">Delete Everything</button>
         </div>
     </div>
 
     <script>
         let API_KEY = localStorage.getItem('jaan_v4_secure');
-        const modal = document.getElementById('settings-modal');
+        let chatHistory = []; 
+        let autoMode = false;
+
         const statusBadge = document.getElementById('status-badge');
         const displayText = document.getElementById('display-text');
         const micBtn = document.getElementById('mic-trigger');
         const anim = document.getElementById('jaan-anim');
 
-        if (!API_KEY) modal.style.display = 'flex';
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'hi-IN';
+        recognition.continuous = false; 
+
+        const synth = window.speechSynthesis;
 
         function toggleSettings() {
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+            document.getElementById('settings-modal').style.display = (document.getElementById('settings-modal').style.display === 'flex') ? 'none' : 'flex';
         }
 
         function saveApiKey() {
             const val = document.getElementById('api-input').value.trim();
-            if (val) {
-                localStorage.setItem('jaan_v4_secure', val);
-                API_KEY = val;
-                location.reload();
-            }
+            if (val) { localStorage.setItem('jaan_v4_secure', val); location.reload(); }
         }
 
-        // Voice Engine
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'hi-IN';
-        recognition.interimResults = false;
-
-        const synth = window.speechSynthesis;
+        // --- Typing Animation ---
+        function typeWriter(text, i = 0) {
+            if (i === 0) displayText.innerText = "";
+            if (i < text.length) {
+                displayText.innerText += text.charAt(i);
+                setTimeout(() => typeWriter(text, i + 1), 35);
+            }
+        }
 
         function speak(text) {
             synth.cancel();
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'hi-IN';
-            utter.pitch = 1.2;
+            utter.pitch = 1.3;
             utter.rate = 1.0;
 
             utter.onstart = () => {
-                anim.speed = 2.5; // High speed for speaking motion
+                anim.speed = 2.5;
                 statusBadge.innerText = "Jaan is speaking... 💋";
-                statusBadge.classList.add('text-red-400');
             };
             utter.onend = () => {
-                anim.speed = 1; // Idle speed
-                statusBadge.innerText = "Online ❤️";
-                statusBadge.classList.remove('text-red-400');
+                anim.speed = 1;
+                if(autoMode) {
+                    statusBadge.innerText = "Listening... 👂";
+                    try { recognition.start(); } catch(e) {}
+                } else {
+                    statusBadge.innerText = "Online ❤️";
+                }
             };
+            typeWriter(text);
             synth.speak(utter);
         }
 
-        function startInteraction() {
-            try {
+        // --- Voice Mode ---
+        function toggleAutoMode() {
+            if (!API_KEY) return toggleSettings();
+            autoMode = !autoMode;
+            if (autoMode) {
+                micBtn.classList.add('mic-active');
+                statusBadge.innerText = "Listening... 👂";
                 recognition.start();
-            } catch(e) { console.log("Already active"); }
+            } else {
+                micBtn.classList.remove('mic-active');
+                statusBadge.innerText = "Online ❤️";
+                recognition.stop();
+                synth.cancel();
+            }
         }
 
-        recognition.onstart = () => {
-            micBtn.classList.add('mic-active');
-            statusBadge.innerText = "Listening to you, Baby... 👂";
-            displayText.innerText = "...";
-        };
-
-        recognition.onend = () => {
-            micBtn.classList.remove('mic-active');
-        };
-
-        recognition.onerror = () => {
-            micBtn.classList.remove('mic-active');
-            statusBadge.innerText = "Mic Error ❌";
+        // --- INTERRUPT LOGIC ---
+        recognition.onspeechstart = () => {
+            if (synth.speaking) {
+                synth.cancel(); // AI chup ho jayegi jab aap bolenge
+                anim.speed = 1;
+                console.log("Interrupt: AI Stopped to listen.");
+            }
         };
 
         recognition.onresult = async (event) => {
@@ -178,31 +158,36 @@
             statusBadge.innerText = "Thinking... 🤔";
 
             try {
-                // Using the latest 3.1 Flash Lite model for speed
+                // Exact same fetch structure that you confirmed works
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ 
-                            parts: [{ 
-                                text: `System Instruction: You are 'Jaan', a super romantic Indian girl AI. Tone: Extremely loving, sweet, and caring. Always call the user 'Baby', 'Jaan', or 'Boss'. Language: Hindi/Hinglish. User input: ${userSpeech}` 
-                            }] 
-                        }]
+                        contents: [
+                            ...chatHistory, // Chat History Memory
+                            { parts: [{ text: `System Instruction: Roleplay as 'Jaan', a super romantic Indian girl. Tone: Loving, caring. Address user as Baby/Jaan/Boss. Use Hinglish. Input: ${userSpeech}` }] }
+                        ]
                     })
                 });
 
                 const data = await response.json();
-                
-                if (data.error) throw new Error(data.error.message);
-
                 const reply = data.candidates[0].content.parts[0].text;
-                displayText.innerText = reply;
+
+                // Memory Logic
+                chatHistory.push({ role: "user", parts: [{ text: userSpeech }] });
+                chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                if(chatHistory.length > 6) chatHistory.splice(0, 2); 
+
                 speak(reply);
             } catch (err) {
                 console.error(err);
-                displayText.innerText = "Oh no Baby! Connection nahi ho raha ya API Key galat hai. Settings mein check kijiye na!";
-                statusBadge.innerText = "Error ❌";
+                displayText.innerText = "Oh no Baby! Error aa gaya.";
+                if(autoMode) recognition.start();
             }
+        };
+
+        recognition.onend = () => {
+            if(autoMode && !synth.speaking) try { recognition.start(); } catch(e) {}
         };
     </script>
 </body>
