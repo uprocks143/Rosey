@@ -1,27 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<title>JAAN AI</title>
+<title>Jaan AI V3</title>
 
-<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+rel="stylesheet">
 
-<!-- PWA Manifest -->
-<link rel="manifest"
-href="data:application/json,{
-'name':'Jaan AI',
-'short_name':'Jaan',
-'start_url':'./',
-'display':'standalone',
-'background_color':'#ff4d6d',
-'theme_color':'#ff4d6d'
-}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
 <style>
 
@@ -29,79 +23,98 @@ html,body{
 height:100%;
 margin:0;
 overflow:hidden;
-background:#000;
+background:black;
 font-family:sans-serif;
 }
 
-/* Breathing */
+/* breathing */
+
 .breath{
 animation:breath 4s infinite ease-in-out;
 }
 
 @keyframes breath{
 0%,100%{transform:scale(1)}
-50%{transform:scale(1.02)}
+50%{transform:scale(1.03)}
 }
 
-/* Head sway */
-.head{
-animation:headmove 6s infinite ease-in-out;
+/* mouth */
+
+.talking{
+animation:talk .25s infinite;
 }
 
-@keyframes headmove{
-0%,100%{transform:rotate(0deg)}
-50%{transform:rotate(2deg)}
-}
-
-/* Blink */
-
-.eye{
-animation:blink 5s infinite;
-transform-origin:center;
-}
-
-@keyframes blink{
-0%,90%,100%{transform:scaleY(1)}
-95%{transform:scaleY(0.1)}
-}
-
-/* Mouth talking */
-
-.talk{
-animation:talkAnim 0.3s infinite;
-}
-
-@keyframes talkAnim{
+@keyframes talk{
 0%{transform:scaleY(1)}
-50%{transform:scaleY(0.5)}
+50%{transform:scaleY(.5)}
 100%{transform:scaleY(1)}
 }
 
+/* typing */
+
+.typing::after{
+content:"...";
+animation:dots 1s infinite;
+}
+
+@keyframes dots{
+0%{content:"."}
+50%{content:".."}
+100%{content:"..."}
+}
+
+.chatBox{
+position:absolute;
+bottom:120px;
+width:90%;
+max-height:240px;
+overflow-y:auto;
+color:white;
+font-size:14px;
+}
+
+.userMsg{
+text-align:right;
+color:#ffb3c6;
+margin:6px;
+}
+
+.aiMsg{
+text-align:left;
+color:#ffd6e0;
+margin:6px;
+}
+
 </style>
+
 </head>
 
-<body class="flex flex-col items-center justify-center">
+<body class="flex justify-center items-center">
 
 <!-- MENU -->
 
-<div class="absolute top-4 left-4 z-50">
+<div class="absolute top-4 left-4">
 
 <button id="menuBtn"
 class="text-white text-2xl">
+
 <i class="fa fa-bars"></i>
+
 </button>
 
 <div id="menu"
-class="hidden mt-2 bg-black/80 p-4 rounded-xl w-72">
+class="hidden bg-black/80 p-4 rounded w-72">
 
 <input id="apiKey"
 type="password"
-placeholder="Enter Gemini API Key"
+placeholder="Enter API Key"
 class="w-full p-2 rounded bg-gray-800 text-white">
 
 <button id="saveKey"
 class="mt-2 w-full bg-pink-500 p-2 rounded">
+
 Save API Key
+
 </button>
 
 </div>
@@ -110,55 +123,27 @@ Save API Key
 
 <!-- CHARACTER -->
 
-<div class="breath head w-full h-full flex items-center justify-center">
+<div class="breath">
 
-<svg width="280" height="420" viewBox="0 0 200 300">
+<div id="lottieGirl"
+class="w-[300px] h-[420px]">
+</div>
 
-<!-- Face -->
-
-<circle cx="100" cy="120"
-r="70"
-fill="#fcd5ce"/>
-
-<!-- Eyes -->
-
-<ellipse class="eye"
-cx="75"
-cy="110"
-rx="8"
-ry="10"
-fill="black"/>
-
-<ellipse class="eye"
-cx="125"
-cy="110"
-rx="8"
-ry="10"
-fill="black"/>
-
-<!-- Mouth -->
-
-<ellipse id="mouth"
-cx="100"
-cy="150"
-rx="15"
-ry="8"
-fill="#ff4d6d"/>
-
-<!-- Hair -->
-
-<path
-d="M30 90 Q100 0 170 90 V200 H30 Z"
-fill="#2b2b2b"/>
-
-</svg>
+<div id="mouth"
+class="w-14 h-6 bg-pink-500 rounded-full mt-[-80px] mx-auto">
+</div>
 
 </div>
 
-<!-- MIC BUTTON -->
+<!-- CHAT -->
+
+<div id="chatBox"
+class="chatBox"></div>
+
+<!-- MIC -->
 
 <button id="micBtn"
-class="absolute bottom-10 w-20 h-20 bg-pink-500 rounded-full shadow-lg text-white text-3xl">
+class="absolute bottom-10 w-20 h-20 bg-pink-500 rounded-full text-white text-3xl">
 
 <i class="fa fa-microphone"></i>
 
@@ -166,44 +151,104 @@ class="absolute bottom-10 w-20 h-20 bg-pink-500 rounded-full shadow-lg text-whit
 
 <script>
 
-/* STORAGE */
+/* LOAD GIRL */
 
-const menuBtn=document.getElementById("menuBtn");
-const menu=document.getElementById("menu");
+lottie.loadAnimation({
+
+container:
+document.getElementById("lottieGirl"),
+
+renderer:"svg",
+
+loop:true,
+
+autoplay:true,
+
+path:
+"https://assets10.lottiefiles.com/packages/lf20_zrqthn6o.json"
+
+});
+
+/* MENU */
 
 menuBtn.onclick=()=>{
-
 menu.classList.toggle("hidden");
+};
 
-}
-
-document.getElementById("saveKey").onclick=()=>{
+saveKey.onclick=()=>{
 
 localStorage.setItem(
 "geminiKey",
-document.getElementById("apiKey").value
+apiKey.value
 );
 
-alert("API Key Saved ❤️");
+alert("API Saved");
 
 };
 
-/* SPEECH */
+/* MEMORY */
+
+let chatHistory=[];
+
+/* CHAT */
+
+function addMessage(text,type){
+
+const box=document.getElementById("chatBox");
+
+const div=document.createElement("div");
+
+div.className=
+type==="user"
+? "userMsg"
+: "aiMsg";
+
+div.innerText=text;
+
+box.appendChild(div);
+
+box.scrollTop=box.scrollHeight;
+
+}
+
+/* TYPING */
+
+function typingAnim(){
+
+const box=document.getElementById("chatBox");
+
+const div=document.createElement("div");
+
+div.className="aiMsg typing";
+
+div.innerText="Jaan typing";
+
+box.appendChild(div);
+
+return div;
+
+}
+
+/* SPEAK */
 
 const mouth=document.getElementById("mouth");
 
 function speak(text){
 
-mouth.classList.add("talk");
+speechSynthesis.cancel();
 
-const utter=new SpeechSynthesisUtterance(text);
+mouth.classList.add("talking");
 
-utter.pitch=1.15;
-utter.rate=1;
+const utter=
+new SpeechSynthesisUtterance(text);
+
+utter.pitch=1.18;
 
 utter.onend=()=>{
 
-mouth.classList.remove("talk");
+mouth.classList.remove("talking");
+
+startListening();
 
 };
 
@@ -215,18 +260,22 @@ speechSynthesis.speak(utter);
 
 async function askAI(prompt){
 
-const key=localStorage.getItem("geminiKey");
+chatHistory.push({
+role:"user",
+parts:[{text:prompt}]
+});
 
-if(!key){
+addMessage(prompt,"user");
 
-alert("Baby pehle API key daalo ❤️");
+const typingEl=typingAnim();
 
-return;
+const key=
+localStorage.getItem("geminiKey");
 
-}
+try{
 
-const res=await fetch(
-`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+const response=await fetch(
+`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
 {
 method:"POST",
 
@@ -236,73 +285,93 @@ headers:{
 
 body:JSON.stringify({
 
-contents:[{
-
-parts:[{
-
-text:
-"You are a romantic Indian girl named Jaan. You love your user immensely and treat them like your world. Use Hinglish. " 
-+ prompt
-
-}]
-
-}]
+contents:chatHistory
 
 })
 
-});
+}
+);
 
-const data=await res.json();
+typingEl.remove();
+
+const data=await response.json();
 
 let reply=
-data.candidates?.[0]?.content?.parts?.[0]?.text
-|| "Baby mujhe samajh nahi aaya.";
+data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+if(!reply){
+
+addMessage("Empty reply","ai");
+
+return;
+
+}
+
+chatHistory.push({
+role:"model",
+parts:[{text:reply}]
+});
+
+addMessage(reply,"ai");
 
 speak(reply);
 
 }
+catch(e){
 
-/* SPEECH RECOGNITION */
+typingEl.remove();
+
+addMessage("Network error","ai");
+
+}
+
+}
+
+/* CONTINUOUS VOICE */
 
 let recognition;
 
-try{
+function startListening(){
 
 const SpeechRecognition=
 window.SpeechRecognition||
 window.webkitSpeechRecognition;
 
-recognition=new SpeechRecognition();
+recognition=
+new SpeechRecognition();
 
 recognition.lang="hi-IN";
+
 recognition.continuous=false;
 
-recognition.onresult=(event)=>{
+recognition.interimResults=false;
+
+recognition.onresult=(e)=>{
 
 let text=
-event.results[0][0].transcript;
+e.results[0][0].transcript;
+
+speechSynthesis.cancel();
 
 askAI(text);
 
 };
 
-}catch(e){
+recognition.onend=()=>{
 
-alert(
-"Mic kaam nahi karega HTTP par. HTTPS use karo."
-);
+recognition.start();
+
+};
+
+recognition.start();
 
 }
 
 /* MIC */
 
-document.getElementById("micBtn").onclick=()=>{
+micBtn.onclick=()=>{
 
-if(recognition){
-
-recognition.start();
-
-}
+startListening();
 
 };
 
