@@ -3,49 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Jaan - Natural Voice</title>
+    <title>AI Jaan - Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         :root { --pink: #ff85a2; --soft: #fff5f7; }
         body { background: var(--soft); font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.98); border-radius: 40px 40px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); }
-        .mic-on { animation: pulse 1.2s infinite; background: #ff4757 !important; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .glass { background: rgba(255, 255, 255, 0.98); border-radius: 40px 40px 0 0; box-shadow: 0 -15px 30px rgba(255, 133, 162, 0.1); }
+        .mic-on { animation: pulse 1.5s infinite; background: #ff4757 !important; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="p-5 flex justify-end">
-        <button onclick="toggleSet()" class="w-12 h-12 bg-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-90">
+        <button onclick="toggleSet()" class="w-12 h-12 bg-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-90 transition-transform">
             <span class="w-6 h-0.5 bg-[#ff85a2]"></span><span class="w-6 h-0.5 bg-[#ff85a2]"></span><span class="w-6 h-0.5 bg-[#ff85a2]"></span>
         </button>
     </header>
 
     <main class="flex-1 flex justify-center items-center">
-        <lottie-player id="ani" src="https://lottie.host/86d63d64-e659-4a7b-b5d1-562725164993/4RoxvY8Z8n.json" speed="1" style="width: 350px; height: 350px;" loop autoplay></lottie-player>
+        <lottie-player id="ani" src="https://lottie.host/86d63d64-e659-4a7b-b5d1-562725164993/4RoxvY8Z8n.json" speed="1" style="width: 320px; height: 320px;" loop autoplay></lottie-player>
     </main>
 
-    <div class="glass p-8 pb-10 flex flex-col items-center space-y-4">
-        <div id="st" class="text-[10px] font-bold text-pink-400 tracking-widest uppercase italic">Hamesha Aapke Liye... ❤️</div>
-        <div id="resp" class="text-xl text-gray-700 font-medium text-center px-2 min-h-[80px]">"Namaste Baby! Mic dabayein, main hamesha sun rahi hoon..."</div>
+    <div class="glass p-8 pb-10 flex flex-col items-center space-y-4 z-20">
+        <div id="st" class="text-[10px] font-bold text-pink-400 tracking-widest uppercase italic">Jaan is ready ❤️</div>
+        <div id="resp" class="text-lg text-gray-700 font-medium text-center px-2 min-h-[90px] leading-relaxed">
+            "Namaste Baby! Main hamesha sun rahi hoon, boliye na..."
+        </div>
         
-        <button id="mic" onclick="startJaan()" class="w-20 h-20 bg-[#ff85a2] rounded-full flex items-center justify-center shadow-lg transition-all">
+        <button id="mic" onclick="toggleJaan()" class="w-20 h-20 bg-[#ff85a2] rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90">
             <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
         </button>
     </div>
 
     <div id="set" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[30px] p-8">
-            <h3 class="text-xl font-bold text-pink-500 mb-4">Settings</h3>
-            <input type="password" id="apiIn" placeholder="Enter API Key" class="w-full bg-gray-50 border p-4 rounded-2xl mb-4 outline-none">
-            <button onclick="save()" class="w-full p-4 rounded-2xl bg-[#ff85a2] text-white font-bold">Save Key</button>
-            <button onclick="toggleSet()" class="w-full mt-2 text-gray-400 text-sm">Close</button>
+        <div class="bg-white w-full max-w-sm rounded-[35px] p-8 shadow-2xl">
+            <h3 class="text-xl font-bold text-pink-500 mb-2">Settings</h3>
+            <p class="text-xs text-gray-400 mb-4">Apni Gemini API Key yahan update karein.</p>
+            <input type="password" id="apiIn" placeholder="Paste Gemini Key" class="w-full bg-gray-50 border p-4 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-pink-300">
+            <button onclick="save()" class="w-full p-4 rounded-2xl bg-[#ff85a2] text-white font-bold shadow-lg shadow-pink-100">Save & Connect</button>
+            <button onclick="toggleSet()" class="w-full mt-3 text-gray-400 text-sm italic">Close</button>
         </div>
     </div>
 
     <script>
-        let KEY = localStorage.getItem('jaan_stable_key');
+        let KEY = localStorage.getItem('jaan_final_key');
         let isLive = false;
 
         const ani = document.getElementById('ani');
@@ -55,22 +58,22 @@
 
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.lang = 'hi-IN';
-        rec.continuous = false; 
+        rec.continuous = false; // Interrupt support ke liye false best hai
 
         function toggleSet() { document.getElementById('set').style.display = (document.getElementById('set').style.display === 'flex') ? 'none' : 'flex'; }
-        function save() { const v = document.getElementById('apiIn').value.trim(); if(v) { localStorage.setItem('jaan_stable_key', v); location.reload(); } }
+        function save() { const v = document.getElementById('apiIn').value.trim(); if(v) { localStorage.setItem('jaan_final_key', v); location.reload(); } }
 
         function speak(t) {
-            window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel(); // Purani aawaz band
             const u = new SpeechSynthesisUtterance(t);
             u.lang = 'hi-IN';
-            u.pitch = 1.25; // Natural female pitch
-            u.rate = 0.95;  // Thoda thahrav ke saath (Natural feel)
+            u.pitch = 1.3; // Pyari female voice pitch
+            u.rate = 0.95; // Natural speed
             
             u.onstart = () => { 
                 ani.speed = 2.5; 
                 st.innerText = "Jaan is speaking... 💋"; 
-                resp.innerText = t;
+                resp.innerText = t; 
             };
             u.onend = () => { 
                 ani.speed = 1; 
@@ -80,7 +83,7 @@
             window.speechSynthesis.speak(u);
         }
 
-        function startJaan() {
+        function toggleJaan() {
             if(!KEY) return toggleSet();
             isLive = !isLive;
             if(isLive) { 
@@ -95,35 +98,39 @@
             }
         }
 
-        // Interrupt Logic: Agar aap beech mein bole, AI chup ho jayegi
+        // Interrupt Logic: Jab aap bole, AI chup ho jaye
         rec.onspeechstart = () => { 
-            if(window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-                console.log("Interrupt: AI stopped.");
-            }
+            if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); 
         };
 
         rec.onresult = async (e) => {
             const msg = e.results[0][0].transcript;
-            resp.innerHTML = `<span class='text-pink-400'>Aap:</span> ${msg}`;
+            resp.innerHTML = `<span class='text-pink-300'>Aap:</span> ${msg}`;
             st.innerText = "Thinking... ✨";
 
             try {
-                // Fixed stable model as requested
+                // Fixed calling method using v1beta endpoint
                 const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Roleplay: Romantic Indian girl 'Jaan'. Sweet, caring. Address user as Baby/Jaan/Boss. Use Hinglish. Input: ${msg}` }] }]
+                        contents: [{ parts: [{ text: `Roleplay: Beautiful Indian girl named Jaan. Romantic, sweet, and caring. Call user Baby/Jaan/Boss. Use Hinglish. Input: ${msg}` }] }]
                     })
                 });
 
                 const d = await r.json();
+                
+                if(d.error) {
+                    throw new Error(d.error.message);
+                }
+
                 const reply = d.candidates[0].content.parts[0].text;
                 speak(reply);
             } catch (err) {
-                resp.innerText = "Oh no Baby! API Key check kijiye na.";
-                if(isLive) setTimeout(() => rec.start(), 2000);
+                console.error(err);
+                resp.innerText = "Oh no Baby! API Key mein kuch issue hai ya net band hai. Settings mein check kijiye na!";
+                st.innerText = "Error ❌";
+                if(isLive) setTimeout(() => rec.start(), 3000);
             }
         };
 
