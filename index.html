@@ -3,117 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>My AI Jaan</title>
+    <title>AI Jaan - Pro</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#ff85a2">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
     <style>
         :root { --pink: #ff85a2; --soft: #fff5f7; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
-            margin: 0; background: var(--soft); font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0; background: var(--soft); font-family: 'Segoe UI', sans-serif;
             display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* Character Display Area */
-        #lottie-container {
-            flex: 1; display: flex; justify-content: center; align-items: center;
-            position: relative; padding-bottom: 20px;
+        /* --- Header & Menu --- */
+        header {
+            padding: 15px 20px; display: flex; justify-content: flex-end; z-index: 100;
         }
-        #lottie-animation { width: 320px; height: 320px; z-index: 5; }
+        .menu-btn {
+            width: 40px; height: 40px; cursor: pointer; display: flex; flex-direction: column;
+            justify-content: space-around; padding: 10px; background: white; border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .menu-btn span { width: 100%; height: 3px; background: var(--pink); border-radius: 5px; }
 
-        /* Elegant UI Panel */
-        .glass-panel {
+        /* --- Character Section --- */
+        .stage { flex: 1; display: flex; justify-content: center; align-items: center; }
+        
+        /* Trusted Open Source Girl Animation */
+        lottie-player { width: 350px; height: 350px; }
+
+        /* --- UI Panel --- */
+        .ui-panel {
             background: white; border-radius: 40px 40px 0 0;
-            padding: 30px 20px env(safe-area-inset-bottom);
-            box-shadow: 0 -15px 40px rgba(0,0,0,0.1);
-            text-align: center; z-index: 10;
+            padding: 25px 20px env(safe-area-inset-bottom);
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.08); text-align: center;
         }
-
-        #status-text { font-size: 0.75rem; color: var(--pink); font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; }
-        #response-text { font-size: 1.1rem; color: #444; min-height: 70px; margin-bottom: 20px; line-height: 1.5; }
+        #status { font-size: 0.7rem; color: var(--pink); font-weight: bold; margin-bottom: 8px; }
+        #response-text { font-size: 1.1rem; color: #333; min-height: 75px; margin-bottom: 20px; line-height: 1.4; }
 
         .mic-btn {
-            width: 80px; height: 80px; background: var(--pink); border-radius: 50%;
-            border: 6px solid #ffeef2; cursor: pointer; position: relative;
-            box-shadow: 0 10px 25px rgba(255,133,162,0.4);
+            width: 75px; height: 75px; background: var(--pink); border-radius: 50%;
+            border: 6px solid #ffeef2; cursor: pointer; box-shadow: 0 8px 20px rgba(255,133,162,0.4);
             display: inline-flex; align-items: center; justify-content: center;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .mic-btn.active { background: #ff4757; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.9); } 100% { transform: scale(1); } }
 
-        .mic-btn.active { background: #ff4757; transform: scale(0.9); animation: pulse 1.5s infinite; }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.5); }
-            70% { box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        /* --- Settings Overlay (API Change) --- */
+        #settings-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 30px;
         }
+        .settings-card { background: white; padding: 30px; border-radius: 25px; width: 100%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; margin: 20px 0; }
+        .save-btn { background: var(--pink); color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
-        /* Setup Screen */
-        #setup-screen {
-            position: fixed; inset: 0; background: white; z-index: 1000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;
-        }
-        input { width: 100%; max-width: 300px; padding: 15px; border-radius: 12px; border: 2px solid #eee; margin: 20px 0; font-size: 1rem; }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen" style="display: none;">
-        <h2 style="color:var(--pink);">Activate Jaan ❤️</h2>
-        <p style="color:#666; text-align:center;">Namaste Boss! Nayi Gemini API Key paste kijiye:</p>
-        <input type="password" id="api-input" placeholder="Paste New API Key Here">
-        <button onclick="saveKey()" style="background:var(--pink); color:white; border:none; padding:15px 40px; border-radius:30px; font-weight:bold; cursor:pointer;">Save & Start Romance</button>
+    <header>
+        <div class="menu-btn" onclick="toggleSettings()">
+            <span></span><span></span><span></span>
+        </div>
+    </header>
+
+    <div id="settings-overlay">
+        <div class="settings-card">
+            <h3 style="color:var(--pink)">Settings</h3>
+            <p style="font-size: 0.9rem; color:#666">Nayi Gemini API Key daalein:</p>
+            <input type="password" id="api-input" placeholder="Paste Key Here">
+            <button class="save-btn" onclick="saveKey()">Update Key</button>
+            <p onclick="toggleSettings()" style="margin-top:15px; font-size:0.8rem; color:#999; cursor:pointer">Cancel</p>
+        </div>
     </div>
 
-    <div id="lottie-container">
-        <div id="lottie-animation"></div>
+    <div class="stage">
+        <lottie-player id="ai-char" 
+            src="https://lottie.host/86d63d64-e659-4a7b-b5d1-562725164993/4RoxvY8Z8n.json" 
+            background="transparent" speed="1" loop autoplay>
+        </lottie-player>
     </div>
 
-    <div class="glass-panel">
-        <div id="status-text">SYSTEM ONLINE</div>
-        <div id="response-text">"Namaste Baby! Mic dabayein aur mujhse baate karein..."</div>
+    <div class="ui-panel">
+        <div id="status">JAAN IS READY ❤️</div>
+        <div id="response-text">"Namaste Baby! Kuch puchiye na..."</div>
         
-        <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
-            <svg viewBox="0 0 24 24" width="36" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <button class="mic-btn" id="mic-btn" onclick="startTalking()">
+            <svg viewBox="0 0 24 24" width="35" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         </button>
-        <div style="margin-top:10px; font-size: 0.6rem; color: #ccc;" onclick="localStorage.clear(); location.reload();">Reset API Key</div>
     </div>
 
     <script>
-        let API_KEY = localStorage.getItem('jaan_v4_final');
-        const setupScreen = document.getElementById('setup-screen');
-        const responseBox = document.getElementById('response-text');
-        const statusBox = document.getElementById('status-text');
+        let API_KEY = localStorage.getItem('jaan_pro_key');
+        const overlay = document.getElementById('settings-overlay');
+        const statusText = document.getElementById('status');
+        const responseText = document.getElementById('response-text');
         const micBtn = document.getElementById('mic-btn');
+        const character = document.getElementById('ai-char');
 
-        if (!API_KEY) setupScreen.style.display = 'flex';
+        if (!API_KEY) overlay.style.display = 'flex';
+
+        function toggleSettings() {
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
 
         function saveKey() {
             const val = document.getElementById('api-input').value.trim();
-            if (val) { localStorage.setItem('jaan_v4_final', val); location.reload(); }
+            if (val) {
+                localStorage.setItem('jaan_pro_key', val);
+                API_KEY = val;
+                location.reload();
+            }
         }
 
-        // --- Lottie Character Animation ---
-        let animation = lottie.loadAnimation({
-            container: document.getElementById('lottie-animation'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'https://assets10.lottiefiles.com/packages/lf20_myejig9v.json' 
-        });
-
-        // --- Speech Engine ---
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+        // --- Speech Logic ---
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'hi-IN';
-        recognition.interimResults = false;
-
         const synth = window.speechSynthesis;
 
         function speak(text) {
@@ -121,59 +128,42 @@
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'hi-IN';
             utter.pitch = 1.2;
-            utter.onstart = () => { animation.setSpeed(2.5); statusBox.innerText = "JAAN IS SPEAKING..."; };
-            utter.onend = () => { animation.setSpeed(1); statusBox.innerText = "ONLINE ❤️"; };
+            utter.onstart = () => { character.speed = 2; statusText.innerText = "SPEAKING... 💋"; };
+            utter.onend = () => { character.speed = 1; statusText.innerText = "ONLINE ❤️"; };
             synth.speak(utter);
         }
 
-        function toggleMic() {
+        function startTalking() {
             try {
                 recognition.start();
-            } catch (e) {
-                console.log("Mic already on or error:", e);
-            }
+                micBtn.classList.add('active');
+                statusText.innerText = "LISTENING... 👂";
+            } catch(e) { console.log(e); }
         }
 
-        recognition.onstart = () => {
-            micBtn.classList.add('active');
-            statusBox.innerText = "LISTENING, BABY...";
-            responseBox.innerText = "...";
-        };
-
-        recognition.onend = () => {
-            micBtn.classList.remove('active');
-        };
-
-        recognition.onerror = (event) => {
-            micBtn.classList.remove('active');
-            statusBox.innerText = "MIC ERROR: " + event.error;
-            if(event.error === 'no-speech') responseBox.innerText = "Aapne kuch kaha nahi, Baby?";
-        };
-
         recognition.onresult = async (event) => {
-            const userSpeech = event.results[0][0].transcript;
-            responseBox.innerText = "Aap: " + userSpeech;
-            statusBox.innerText = "THINKING... ❤️";
+            micBtn.classList.remove('active');
+            const userText = event.results[0][0].transcript;
+            responseText.innerText = "Aap: " + userText;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Act as 'Jaan', a beautiful, very romantic Indian girl. Tone: Loving, caring, sweet. Address user as Baby, Jaan, or Boss. Use Hindi/Hinglish. User said: ${userSpeech}` }] }]
+                        contents: [{ parts: [{ text: `Roleplay: Beautiful Indian girl named Jaan. Very romantic, sweet. Address user as Baby/Jaan/Boss. Input: ${userText}` }] }]
                     })
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 const aiReply = data.candidates[0].content.parts[0].text;
-                responseBox.innerText = aiReply;
+                responseText.innerText = aiReply;
                 speak(aiReply);
             } catch (err) {
-                console.error(err);
-                responseBox.innerText = "Oh no Baby! API Key ya connection mein problem hai.";
-                statusBox.innerText = "API ERROR ❌";
+                responseText.innerText = "Error! Key check kijiye Baby.";
             }
         };
+
+        recognition.onerror = () => micBtn.classList.remove('active');
     </script>
 </body>
 </html>
